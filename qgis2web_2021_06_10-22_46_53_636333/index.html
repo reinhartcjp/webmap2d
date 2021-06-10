@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>SIP Mitigasi Bencana Banjir Kota Semarang</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <div class="wrap">
+
+            <div style="background: whitesmoke; border: 1px solid whitesmoke; color: blackt-size: 20px; font-weight: bold; 
+             letter-spacing: 0.5em; padding: 10px;">
+             
+             <marquee direction="left" scrollamount="6" align="center">Anda menjumpai bencana banjir? Hubungi 021234567-Yani</marquee>
+             
+             </div> 
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/RisikoBencanaBanjir_1.js"></script>
+        <script src="data/KapasitasBencanaBanjir_2.js"></script>
+        <script src="data/KerentananBencanaBanjir_3.js"></script>
+        <script src="data/KerawananBencanaBanjir_4.js"></script>
+        <script src="data/AreaBencanaBanjirTerdeteksi_5.js"></script>
+        <script src="data/WilayahAdministrasiKecamatan_6.js"></script>
+        <script src="data/TitikEvakuasiBencanaBanjir_7.js"></script>
+        <script src="data/EarlyWarningSystem_8.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[-7.116976869104842,110.25236025031364],[-6.920362532584067,110.5239308562315]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 18
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_RisikoBencanaBanjir_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">DN</th>\
+                        <td>' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td>' + (feature.properties['Keterangan'] !== null ? autolinker.link(feature.properties['Keterangan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+        //Title
+		var title = new L.Control();
+		title.onAdd = function (map) {
+		   this._div = L.DomUtil.create('div', 'info');
+		   this.update();
+		   return this._div;
+		};
+		title.update = function () {
+		   this._div.innerHTML = '<h2>Sistem Informasi Mitigasi Bencana Banjir</h2>KOTA SEMARANG'
+		};
+		title.addTo(map); 
+        function style_RisikoBencanaBanjir_1_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Risiko Sangat Rendah':
+                    return {
+                pane: 'pane_RisikoBencanaBanjir_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,245,240,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Risiko Rendah':
+                    return {
+                pane: 'pane_RisikoBencanaBanjir_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,204,184,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Risiko Sedang':
+                    return {
+                pane: 'pane_RisikoBencanaBanjir_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,143,111,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Risiko Tinggi':
+                    return {
+                pane: 'pane_RisikoBencanaBanjir_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(244,77,55,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Risiko Sangat Tinggi':
+                    return {
+                pane: 'pane_RisikoBencanaBanjir_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(197,22,27,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_RisikoBencanaBanjir_1');
+        map.getPane('pane_RisikoBencanaBanjir_1').style.zIndex = 401;
+        map.getPane('pane_RisikoBencanaBanjir_1').style['mix-blend-mode'] = 'normal';
+        var layer_RisikoBencanaBanjir_1 = new L.geoJson(json_RisikoBencanaBanjir_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RisikoBencanaBanjir_1',
+            layerName: 'layer_RisikoBencanaBanjir_1',
+            pane: 'pane_RisikoBencanaBanjir_1',
+            onEachFeature: pop_RisikoBencanaBanjir_1,
+            style: style_RisikoBencanaBanjir_1_0,
+        });
+        bounds_group.addLayer(layer_RisikoBencanaBanjir_1);
+        map.addLayer(layer_RisikoBencanaBanjir_1);
+        function pop_KapasitasBencanaBanjir_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">DN</th>\
+                        <td>' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td>' + (feature.properties['Keterangan'] !== null ? autolinker.link(feature.properties['Keterangan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_KapasitasBencanaBanjir_2_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Kapasitas Rendah':
+                    return {
+                pane: 'pane_KapasitasBencanaBanjir_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,245,240,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kapasitas Sedang':
+                    return {
+                pane: 'pane_KapasitasBencanaBanjir_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,164,135,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kapasitas Tinggi':
+                    return {
+                pane: 'pane_KapasitasBencanaBanjir_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(235,54,42,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KapasitasBencanaBanjir_2');
+        map.getPane('pane_KapasitasBencanaBanjir_2').style.zIndex = 402;
+        map.getPane('pane_KapasitasBencanaBanjir_2').style['mix-blend-mode'] = 'normal';
+        var layer_KapasitasBencanaBanjir_2 = new L.geoJson(json_KapasitasBencanaBanjir_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KapasitasBencanaBanjir_2',
+            layerName: 'layer_KapasitasBencanaBanjir_2',
+            pane: 'pane_KapasitasBencanaBanjir_2',
+            onEachFeature: pop_KapasitasBencanaBanjir_2,
+            style: style_KapasitasBencanaBanjir_2_0,
+        });
+        bounds_group.addLayer(layer_KapasitasBencanaBanjir_2);
+        map.addLayer(layer_KapasitasBencanaBanjir_2);
+        function pop_KerentananBencanaBanjir_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">DN</th>\
+                        <td>' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td>' + (feature.properties['Keterangan'] !== null ? autolinker.link(feature.properties['Keterangan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_KerentananBencanaBanjir_3_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Kerentanan Rendah':
+                    return {
+                pane: 'pane_KerentananBencanaBanjir_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,245,240,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kerentanan Sedang':
+                    return {
+                pane: 'pane_KerentananBencanaBanjir_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,164,135,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kerentanan Tinggi':
+                    return {
+                pane: 'pane_KerentananBencanaBanjir_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(235,54,42,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KerentananBencanaBanjir_3');
+        map.getPane('pane_KerentananBencanaBanjir_3').style.zIndex = 403;
+        map.getPane('pane_KerentananBencanaBanjir_3').style['mix-blend-mode'] = 'normal';
+        var layer_KerentananBencanaBanjir_3 = new L.geoJson(json_KerentananBencanaBanjir_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KerentananBencanaBanjir_3',
+            layerName: 'layer_KerentananBencanaBanjir_3',
+            pane: 'pane_KerentananBencanaBanjir_3',
+            onEachFeature: pop_KerentananBencanaBanjir_3,
+            style: style_KerentananBencanaBanjir_3_0,
+        });
+        bounds_group.addLayer(layer_KerentananBencanaBanjir_3);
+        map.addLayer(layer_KerentananBencanaBanjir_3);
+        function pop_KerawananBencanaBanjir_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">DN</th>\
+                        <td>' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td>' + (feature.properties['Keterangan'] !== null ? autolinker.link(feature.properties['Keterangan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_KerawananBencanaBanjir_4_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Kerawanan Rendah':
+                    return {
+                pane: 'pane_KerawananBencanaBanjir_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,245,240,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kerawanan Sedang':
+                    return {
+                pane: 'pane_KerawananBencanaBanjir_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(252,164,135,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kerawanan Tinggi':
+                    return {
+                pane: 'pane_KerawananBencanaBanjir_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(235,54,42,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KerawananBencanaBanjir_4');
+        map.getPane('pane_KerawananBencanaBanjir_4').style.zIndex = 404;
+        map.getPane('pane_KerawananBencanaBanjir_4').style['mix-blend-mode'] = 'normal';
+        var layer_KerawananBencanaBanjir_4 = new L.geoJson(json_KerawananBencanaBanjir_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KerawananBencanaBanjir_4',
+            layerName: 'layer_KerawananBencanaBanjir_4',
+            pane: 'pane_KerawananBencanaBanjir_4',
+            onEachFeature: pop_KerawananBencanaBanjir_4,
+            style: style_KerawananBencanaBanjir_4_0,
+        });
+        bounds_group.addLayer(layer_KerawananBencanaBanjir_4);
+        map.addLayer(layer_KerawananBencanaBanjir_4);
+        function pop_AreaBencanaBanjirTerdeteksi_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Skor'] !== null ? autolinker.link(feature.properties['Skor'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_AreaBencanaBanjirTerdeteksi_5_0() {
+            return {
+                pane: 'pane_AreaBencanaBanjirTerdeteksi_5',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,206,227,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_AreaBencanaBanjirTerdeteksi_5');
+        map.getPane('pane_AreaBencanaBanjirTerdeteksi_5').style.zIndex = 405;
+        map.getPane('pane_AreaBencanaBanjirTerdeteksi_5').style['mix-blend-mode'] = 'normal';
+        var layer_AreaBencanaBanjirTerdeteksi_5 = new L.geoJson(json_AreaBencanaBanjirTerdeteksi_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_AreaBencanaBanjirTerdeteksi_5',
+            layerName: 'layer_AreaBencanaBanjirTerdeteksi_5',
+            pane: 'pane_AreaBencanaBanjirTerdeteksi_5',
+            onEachFeature: pop_AreaBencanaBanjirTerdeteksi_5,
+            style: style_AreaBencanaBanjirTerdeteksi_5_0,
+        });
+        bounds_group.addLayer(layer_AreaBencanaBanjirTerdeteksi_5);
+        map.addLayer(layer_AreaBencanaBanjirTerdeteksi_5);
+        function pop_WilayahAdministrasiKecamatan_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kec'] !== null ? autolinker.link(feature.properties['kec'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_WilayahAdministrasiKecamatan_6_0() {
+            return {
+                pane: 'pane_WilayahAdministrasiKecamatan_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '10,5,1,5,1,5',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,113,72,0.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_WilayahAdministrasiKecamatan_6');
+        map.getPane('pane_WilayahAdministrasiKecamatan_6').style.zIndex = 406;
+        map.getPane('pane_WilayahAdministrasiKecamatan_6').style['mix-blend-mode'] = 'normal';
+        var layer_WilayahAdministrasiKecamatan_6 = new L.geoJson(json_WilayahAdministrasiKecamatan_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_WilayahAdministrasiKecamatan_6',
+            layerName: 'layer_WilayahAdministrasiKecamatan_6',
+            pane: 'pane_WilayahAdministrasiKecamatan_6',
+            onEachFeature: pop_WilayahAdministrasiKecamatan_6,
+            style: style_WilayahAdministrasiKecamatan_6_0,
+        });
+        bounds_group.addLayer(layer_WilayahAdministrasiKecamatan_6);
+        map.addLayer(layer_WilayahAdministrasiKecamatan_6);
+        function pop_TitikEvakuasiBencanaBanjir_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kelas_bnjr'] !== null ? autolinker.link(feature.properties['kelas_bnjr'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kode_pos'] !== null ? autolinker.link(feature.properties['kode_pos'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kode_kel'] !== null ? autolinker.link(feature.properties['kode_kel'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kode_kec'] !== null ? autolinker.link(feature.properties['kode_kec'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kelurahan'] !== null ? autolinker.link(feature.properties['kelurahan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kecamatan'] !== null ? autolinker.link(feature.properties['kecamatan'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['zona_eks'] !== null ? autolinker.link(feature.properties['zona_eks'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['kaw_eks'] !== null ? autolinker.link(feature.properties['kaw_eks'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ORIG_FID'] !== null ? autolinker.link(feature.properties['ORIG_FID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_TitikEvakuasiBencanaBanjir_7_0() {
+            return {
+                pane: 'pane_TitikEvakuasiBencanaBanjir_7',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/blue-marker.svg',
+            iconSize: [38.0, 38.0]
+        }),
+                interactive: false,
+            }
+        }
+        map.createPane('pane_TitikEvakuasiBencanaBanjir_7');
+        map.getPane('pane_TitikEvakuasiBencanaBanjir_7').style.zIndex = 407;
+        map.getPane('pane_TitikEvakuasiBencanaBanjir_7').style['mix-blend-mode'] = 'normal';
+        var layer_TitikEvakuasiBencanaBanjir_7 = new L.geoJson(json_TitikEvakuasiBencanaBanjir_7, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_TitikEvakuasiBencanaBanjir_7',
+            layerName: 'layer_TitikEvakuasiBencanaBanjir_7',
+            pane: 'pane_TitikEvakuasiBencanaBanjir_7',
+            onEachFeature: pop_TitikEvakuasiBencanaBanjir_7,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_TitikEvakuasiBencanaBanjir_7_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_TitikEvakuasiBencanaBanjir_7);
+        map.addLayer(layer_TitikEvakuasiBencanaBanjir_7);
+        function pop_EarlyWarningSystem_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Gambar</strong><br />' + (feature.properties['Gambar'] !== null ? '<img src="images/' + String(feature.properties['Gambar']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_EarlyWarningSystem_8_0() {
+            return {
+                pane: 'pane_EarlyWarningSystem_8',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/red-marker.svg',
+            iconSize: [38.0, 38.0]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_EarlyWarningSystem_8');
+        map.getPane('pane_EarlyWarningSystem_8').style.zIndex = 408;
+        map.getPane('pane_EarlyWarningSystem_8').style['mix-blend-mode'] = 'normal';
+        var layer_EarlyWarningSystem_8 = new L.geoJson(json_EarlyWarningSystem_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_EarlyWarningSystem_8',
+            layerName: 'layer_EarlyWarningSystem_8',
+            pane: 'pane_EarlyWarningSystem_8',
+            onEachFeature: pop_EarlyWarningSystem_8,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_EarlyWarningSystem_8_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_EarlyWarningSystem_8);
+        map.addLayer(layer_EarlyWarningSystem_8);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/EarlyWarningSystem_8.png" /> Early Warning System': layer_EarlyWarningSystem_8,'<img src="legend/TitikEvakuasiBencanaBanjir_7.png" /> Titik Evakuasi Bencana Banjir': layer_TitikEvakuasiBencanaBanjir_7,'<img src="legend/WilayahAdministrasiKecamatan_6.png" /> Wilayah Administrasi Kecamatan': layer_WilayahAdministrasiKecamatan_6,'<img src="legend/AreaBencanaBanjirTerdeteksi_5.png" /> Area Bencana Banjir Terdeteksi': layer_AreaBencanaBanjirTerdeteksi_5,'Kerawanan Bencana Banjir<br /><table><tr><td style="text-align: center;"><img src="legend/KerawananBencanaBanjir_4_KerawananRendah0.png" /></td><td>Kerawanan Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KerawananBencanaBanjir_4_KerawananSedang1.png" /></td><td>Kerawanan Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KerawananBencanaBanjir_4_KerawananTinggi2.png" /></td><td>Kerawanan Tinggi</td></tr></table>': layer_KerawananBencanaBanjir_4,'Kerentanan Bencana Banjir<br /><table><tr><td style="text-align: center;"><img src="legend/KerentananBencanaBanjir_3_KerentananRendah0.png" /></td><td>Kerentanan Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KerentananBencanaBanjir_3_KerentananSedang1.png" /></td><td>Kerentanan Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KerentananBencanaBanjir_3_KerentananTinggi2.png" /></td><td>Kerentanan Tinggi</td></tr></table>': layer_KerentananBencanaBanjir_3,'Kapasitas Bencana Banjir<br /><table><tr><td style="text-align: center;"><img src="legend/KapasitasBencanaBanjir_2_KapasitasRendah0.png" /></td><td>Kapasitas Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KapasitasBencanaBanjir_2_KapasitasSedang1.png" /></td><td>Kapasitas Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KapasitasBencanaBanjir_2_KapasitasTinggi2.png" /></td><td>Kapasitas Tinggi</td></tr></table>': layer_KapasitasBencanaBanjir_2,'Risiko Bencana Banjir<br /><table><tr><td style="text-align: center;"><img src="legend/RisikoBencanaBanjir_1_RisikoSangatRendah0.png" /></td><td>Risiko Sangat Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/RisikoBencanaBanjir_1_RisikoRendah1.png" /></td><td>Risiko Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/RisikoBencanaBanjir_1_RisikoSedang2.png" /></td><td>Risiko Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/RisikoBencanaBanjir_1_RisikoTinggi3.png" /></td><td>Risiko Tinggi</td></tr><tr><td style="text-align: center;"><img src="legend/RisikoBencanaBanjir_1_RisikoSangatTinggi4.png" /></td><td>Risiko Sangat Tinggi</td></tr></table>': layer_RisikoBencanaBanjir_1,"Google Satellite": layer_GoogleSatellite_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_WilayahAdministrasiKecamatan_6.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['kec'] !== null?String('<div style="color: #ffffff; font-size: 10pt; font-family: \'MS Shell Dlg 2\', sans-serif;">' + layer.feature.properties['kec']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_WilayahAdministrasiKecamatan_6'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_WilayahAdministrasiKecamatan_6]);
+        map.on("zoomend", function(){
+            resetLabels([layer_WilayahAdministrasiKecamatan_6]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_WilayahAdministrasiKecamatan_6]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_WilayahAdministrasiKecamatan_6]);
+        });
+        </script>
+    </body>
+</html>
